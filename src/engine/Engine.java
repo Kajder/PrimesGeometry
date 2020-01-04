@@ -1,5 +1,6 @@
 package engine;
-import handler.*;
+
+import handler.Handler;
 import main.MainFrame;
 import mathTools.Point2D;
 
@@ -18,10 +19,10 @@ public class Engine {
     private Integer n; //number to start drawing with
     private Integer S; //type of spiral; 3->triangle, 4->square, 5->pentagon etc.
     private Integer L; //number of pixels to draw between points
-    private Integer dotSize=1;
-    private Integer linesVisible=1;
-    private Integer nonPrimesVisible=1;
-    private Integer automaticRepaint=1;
+    private Integer dotSize = 1;
+    private Integer linesVisible = 1;
+    private Integer nonPrimesVisible = 1;
+    private Integer automaticRepaint = 1;
     private boolean automaticRepaintTempFlag;
     private boolean frameResized;
 
@@ -30,11 +31,11 @@ public class Engine {
     private double alpha; //change of rotation angle
     private double beta; //absolute rotation angle
     private double xC, yC, xN, yN; //coordinates of current and next point to draw
-    private int k=1,l=0,p=0,i=0, m=0, t=0, r=0,s=0, breakMark=0, turns=0; //counters
+    private int k = 1, l = 0, p = 0, i = 0, m = 0, t = 0, r = 0, s = 0, breakMark = 0, turns = 0; //counters
     private int moveX, moveY; //pixels to move to have the center of the dot where the coordinates indicate
 
     //navigational - always available
-    private int zoom, moveLR, moveUD, width=0+zoom+dotSize, height=0+zoom+dotSize;
+    private int zoom, moveLR, moveUD, width = 0 + zoom + dotSize, height = 0 + zoom + dotSize;
 
     //other
     private Point2D activePoint;
@@ -46,55 +47,60 @@ public class Engine {
     InputStream inputStream = classLoader.getResourceAsStream("primes.txt");
     BufferedReader reader = null;
 
-    public Engine(){
+    public Engine() {
         polygonParametersActual = new HashMap<>();
         polygonParametersObsolete = new HashMap<>();
         initializeParametersMaps();
         handler = new Handler(this);
-        activePoint = new Point2D(0,0);
+        activePoint = new Point2D(0, 0);
         mainFrame = new MainFrame(handler);
         readPrimes(inputStream);
         calculate();
     }
 
-    private void initializeParametersMaps(){ //later to be populated from Settings
-        polygonParametersActual.put("N",2000);
-        polygonParametersActual.put("n",0);
-        polygonParametersActual.put("S",4);
-        polygonParametersActual.put("L",7);
-        polygonParametersActual.put("dotSize",1);
-        polygonParametersActual.put("linesVisible",1);
-        polygonParametersActual.put("automaticRepaint",1);
-        polygonParametersActual.put("nonPrimesVisible",1);
+    private void initializeParametersMaps() { //later to be populated from Settings
+        polygonParametersActual.put("N", 2000);
+        polygonParametersActual.put("n", 0);
+        polygonParametersActual.put("S", 4);
+        polygonParametersActual.put("L", 7);
+        polygonParametersActual.put("dotSize", 1);
+        polygonParametersActual.put("linesVisible", 1);
+        polygonParametersActual.put("automaticRepaint", 1);
+        polygonParametersActual.put("nonPrimesVisible", 1);
         updateOldParametersMap();
     }
 
-    public void updateOldParametersMap(){
+    public void updateOldParametersMap() {
         //reminder - actual parameters map get updated with every set-method that is called
         //reminder - old parameters get updated with every RepaintButton click (not with every repaint() method call).
         //And during initialization
         polygonParametersObsolete.putAll(polygonParametersActual);
     }
 
-    public void calculate(){}
+    public void calculate() {
+    }
 
-    public void print(Graphics g){
+    public void print(Graphics g) {
         if (!frameResized) {
             updateOldParametersMap();
         }
-        if (automaticRepaint==1) printPolygonSpiral(g);
+        if (automaticRepaint == 1) {
+            printPolygonSpiral(g);
+        }
     }
 
-    public void printPolygonSpiral(Graphics g){
+    public void printPolygonSpiral(Graphics g) {
         if (automaticRepaintTempFlag) {
             setAutomaticRepaint(0);
             setAutomaticRepaintTempFlag(false);
         }
-        if (frameResized){
-            frameResized=false;
-            polygonPar=polygonParametersObsolete;
-            System.out.println("frame resized - "+frameResized);
-        }else{ polygonPar=polygonParametersActual; }
+        if (frameResized) {
+            frameResized = false;
+            polygonPar = polygonParametersObsolete;
+            System.out.println("frame resized - " + frameResized);
+        } else {
+            polygonPar = polygonParametersActual;
+        }
 
         N = polygonPar.get("N");
         n = polygonPar.get("n");
@@ -109,12 +115,12 @@ public class Engine {
         M = 1;
         alpha = -360 / S;//(-2*Math.PI/S);
         beta = 0;
-        xC = handler.getDrawPanel().getWidth()/2 + moveLR;
-        yC = handler.getDrawPanel().getHeight()/2 + moveUD;
+        xC = handler.getDrawPanel().getWidth() / 2 + moveLR;
+        yC = handler.getDrawPanel().getHeight() / 2 + moveUD;
         k = 1;
         p = 0;
-        width=1+zoom+dotSize;
-        height=1+zoom+dotSize;
+        width = 1 + zoom + dotSize;
+        height = 1 + zoom + dotSize;
         breakMark = 0;
         turns = 0;
         moveX = (int) (Math.floor(width / 2));
@@ -124,18 +130,26 @@ public class Engine {
         g2d.fillRect(0, 0, mainFrame.getDrawPanel().getWidth(), mainFrame.getDrawPanel().getHeight());
         g2d.setColor(Color.YELLOW);
         g2d.fillRect((int) (xC - moveX), (int) (yC - moveY), width, height);
-        allNumbers[(int)(Math.round(xC))][(int)(Math.round(yC))]=n;
+        allNumbers[(int) (Math.round(xC))][(int) (Math.round(yC))] = n;
         n = n + 1;
-        p=0;
-        m=1;
+        p = 0;
+        m = 1;
         for (i = n; i <= N; i++) {
-            if (i<=primes[p]) {
+            if (i <= primes[p]) {
                 //turns navigation
                 if (m <= M) {
-                    if (S == 4) xN = xC + (int) (L * Math.cos(Math.toRadians(beta)));
-                    if (S == 4) yN = yC + (int) (L * Math.sin(Math.toRadians(beta)));
-                    if (S != 4) xN = xC + (L * Math.cos(Math.toRadians(beta)));
-                    if (S != 4) yN = yC + (L * Math.sin(Math.toRadians(beta)));
+                    if (S == 4) {
+                        xN = xC + (int) (L * Math.cos(Math.toRadians(beta)));
+                    }
+                    if (S == 4) {
+                        yN = yC + (int) (L * Math.sin(Math.toRadians(beta)));
+                    }
+                    if (S != 4) {
+                        xN = xC + (L * Math.cos(Math.toRadians(beta)));
+                    }
+                    if (S != 4) {
+                        yN = yC + (L * Math.sin(Math.toRadians(beta)));
+                    }
                     m++;
                 } else {//make turn
                     m = 1;
@@ -147,54 +161,71 @@ public class Engine {
                     }
                     k++;
 
-                    if (S == 4) xN = xC + (int) (L * Math.cos(Math.toRadians(beta)));
-                    if (S == 4) yN = yC + (int) (L * Math.sin(Math.toRadians(beta)));
-                    if (S != 4) xN = xC + (L * Math.cos(Math.toRadians(beta)));
-                    if (S != 4) yN = yC + (L * Math.sin(Math.toRadians(beta)));
+                    if (S == 4) {
+                        xN = xC + (int) (L * Math.cos(Math.toRadians(beta)));
+                    }
+                    if (S == 4) {
+                        yN = yC + (int) (L * Math.sin(Math.toRadians(beta)));
+                    }
+                    if (S != 4) {
+                        xN = xC + (L * Math.cos(Math.toRadians(beta)));
+                    }
+                    if (S != 4) {
+                        yN = yC + (L * Math.sin(Math.toRadians(beta)));
+                    }
                     m++;
                 }
             }
 
             //points and lines painting
-            if(i==primes[p]){
+            if (i == primes[p]) {
                 g2d.setColor(Color.BLACK);
-                if (linesVisible==1) g2d.drawLine((int) xC, (int) yC, (int) xN, (int) yN);
+                if (linesVisible == 1) {
+                    g2d.drawLine((int) xC, (int) yC, (int) xN, (int) yN);
+                }
                 g2d.setColor(Color.BLUE);
                 g2d.fillRect((int) (xN - moveX), (int) (yN - moveY), width, height);
                 //System.out.println(i);
-                if((xN>=0)&&(xN<mainFrame.getDrawPanel().getWidth()-1)&&(yN>=0)&&(yN<mainFrame.getDrawPanel().getHeight()-1)) {
+                if ((xN >= 0) && (xN < mainFrame.getDrawPanel().getWidth() - 1) && (yN >= 0) && (yN < mainFrame.getDrawPanel().getHeight() - 1)) {
                     allNumbers[(int) (Math.round(xN))][(int) (Math.round(yN))] = i;
                 }
-                    p++;
-                    xC = xN;
-                    yC = yN;
+                p++;
+                xC = xN;
+                yC = yN;
 
-            }else if(i<primes[p]){
+            } else if (i < primes[p]) {
                 g2d.setColor(Color.BLACK);
-                if (linesVisible==1) g2d.drawLine((int) xC, (int) yC, (int) xN, (int) yN);
-                if (nonPrimesVisible==1)g2d.fillRect((int) (xN - moveX), (int) (yN - moveY), width, height);
+                if (linesVisible == 1) {
+                    g2d.drawLine((int) xC, (int) yC, (int) xN, (int) yN);
+                }
+                if (nonPrimesVisible == 1) {
+                    g2d.fillRect((int) (xN - moveX), (int) (yN - moveY), width, height);
+                }
                 //System.out.println(i);
-                if((xN>=0)&&(xN<mainFrame.getDrawPanel().getWidth()-1)&&(yN>=0)&&(yN<mainFrame.getDrawPanel().getHeight()-1)) {
+                if ((xN >= 0) && (xN < mainFrame.getDrawPanel().getWidth() - 1) && (yN >= 0) && (yN < mainFrame.getDrawPanel().getHeight() - 1)) {
                     allNumbers[(int) (Math.round(xN))][(int) (Math.round(yN))] = i;
                 }
-                    xC = xN;
-                    yC = yN;
+                xC = xN;
+                yC = yN;
 
-            }else if(i>primes[p]){p++;i--;}
-
+            } else if (i > primes[p]) {
+                p++;
+                i--;
             }
+
+        }
 
 
     }
 
-    public void readPrimes(InputStream inputStream){
+    public void readPrimes(InputStream inputStream) {
         try {
             reader = new BufferedReader(new InputStreamReader(inputStream));
             String text = null;
 
             while ((text = reader.readLine()) != null) {
                 //list.add(Integer.parseInt(text));
-                primes[l]=(int)(Integer.parseInt(text));
+                primes[l] = (int) (Integer.parseInt(text));
                 //System.out.println(primes[l]);
                 l++;
             }
@@ -213,7 +244,7 @@ public class Engine {
 
     }
 
-    public void displayNumber (MouseEvent e) {
+    public void displayNumber(MouseEvent e) {
         //[mainFrame.getDrawPanel().getWidth()][mainFrame.getDrawPanel().getHeight()];
         if ((e.getX() > t) && (e.getX() + t < mainFrame.getDrawPanel().getWidth()) &&
                 (e.getY() > t) && (e.getY() + t < mainFrame.getDrawPanel().getHeight())) {
@@ -242,11 +273,13 @@ public class Engine {
                                     handler.getDrawPanel().setColor(Color.BLUE);
                                     break;
                                 }
-                                if (allNumbers[(int) (activePoint.getX())][(int) (activePoint.getY())] < primes[i])
+                                if (allNumbers[(int) (activePoint.getX())][(int) (activePoint.getY())] < primes[i]) {
                                     break;
+                                }
                             }
-                            if (allNumbers[(int) (activePoint.getX())][(int) (activePoint.getY())] == n)
+                            if (allNumbers[(int) (activePoint.getX())][(int) (activePoint.getY())] == n) {
                                 handler.getDrawPanel().setColor(Color.YELLOW);
+                            }
                             handler.getDrawPanel().setRectangle((int) (activePoint.getX() - moveX), (int) (activePoint.getY() - moveY), width, height);
                             handler.getDrawPanel().setPrintPointFlag(true);
                             handler.getDrawPanel().repaint();
@@ -263,26 +296,70 @@ public class Engine {
     }
 
 
-
-
     //GETTERS
 
-    public MainFrame getMainFrame(){return mainFrame;}
-    public int getS(){return S;}
-    public int getDotSize(){return dotSize;}
-    public Integer getLinesVisibility(){return polygonParametersActual.get("linesVisible");}
-    public Integer getNonPrimesVisible(){return polygonParametersActual.get("nonPrimesVisible");}
-    public Integer getAutomaticRepaint(){return polygonParametersActual.get("automaticRepaint");}
-    public Map<String, Integer> getPolygonParametersActual(){return polygonParametersActual;}
-    public boolean getFrameResized() {return frameResized;}
-    public int getNumberFromCoordinates(int x, int y){return allNumbers[x][y];}
+    public MainFrame getMainFrame() {
+        return mainFrame;
+    }
+
+    public int getS() {
+        return S;
+    }
+
+    public int getDotSize() {
+        return dotSize;
+    }
+
+    public Integer getLinesVisibility() {
+        return polygonParametersActual.get("linesVisible");
+    }
+
+    public Integer getNonPrimesVisible() {
+        return polygonParametersActual.get("nonPrimesVisible");
+    }
+
+    public Integer getAutomaticRepaint() {
+        return polygonParametersActual.get("automaticRepaint");
+    }
+
+    public Map<String, Integer> getPolygonParametersActual() {
+        return polygonParametersActual;
+    }
+
+    public boolean getFrameResized() {
+        return frameResized;
+    }
+
+    public int getNumberFromCoordinates(int x, int y) {
+        return allNumbers[x][y];
+    }
 
     //SETTERS
-    public void setS(int s) {polygonParametersActual.put("S",s);}
-    public void setDotSize(int dotSize) {polygonParametersActual.put("dotSize",dotSize);}
-    public void setLinesVisible(Integer linesVisible) {polygonParametersActual.put("linesVisible",linesVisible);}
-    public void setAutomaticRepaint(Integer val){polygonParametersActual.put("automaticRepaint",val);}
-    public void setNonPrimesVisible(Integer val){polygonParametersActual.put("nonPrimesVisible",val);}
-    public void setAutomaticRepaintTempFlag(boolean flag){automaticRepaintTempFlag=flag;}
-    public void setFrameResized(boolean flag) {frameResized=flag;}
+    public void setS(int s) {
+        polygonParametersActual.put("S", s);
+    }
+
+    public void setDotSize(int dotSize) {
+        polygonParametersActual.put("dotSize", dotSize);
+    }
+
+    public void setLinesVisible(Integer linesVisible) {
+        polygonParametersActual.put("linesVisible", linesVisible);
+    }
+
+    public void setAutomaticRepaint(Integer val) {
+        polygonParametersActual.put("automaticRepaint", val);
+    }
+
+    public void setNonPrimesVisible(Integer val) {
+        polygonParametersActual.put("nonPrimesVisible", val);
+    }
+
+    public void setAutomaticRepaintTempFlag(boolean flag) {
+        automaticRepaintTempFlag = flag;
+    }
+
+    public void setFrameResized(boolean flag) {
+        frameResized = flag;
+    }
 }

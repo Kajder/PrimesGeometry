@@ -1,35 +1,35 @@
 package panels;
+
 import handler.Handler;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.Rectangle2D;
 
 
-public class DrawPanel extends JPanel implements MouseMotionListener{
+public class DrawPanel extends JPanel implements MouseMotionListener {
     private Handler handler;
     private boolean printPointFlag;
     private Rectangle rectangle;
     private Color color;
 
-    public DrawPanel(Handler handler){
+    public DrawPanel(Handler handler) {
         addMouseMotionListener(this);
         this.handler = handler;
-        rectangle = new Rectangle(0,0,0,0);
+        rectangle = new Rectangle(0, 0, 0, 0);
     }
 
-    public void paintComponent(Graphics g){
+    public void paintComponent(Graphics g) {
         if (printPointFlag) {
-        printPoint(g);
-        }else{
+            printPoint(g);
+        } else {
             super.paintComponent(g);
             handler.getEngine().print(g);
         }
     }
 
-    private void printPoint(Graphics g){
+    private void printPoint(Graphics g) {
         g.setColor(color);
         g.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
         repaint();
@@ -41,21 +41,22 @@ public class DrawPanel extends JPanel implements MouseMotionListener{
     public void mouseMoved(MouseEvent e) {
         handler.getEngine().displayNumber(e);
     }
+
     @Override
     public void mouseDragged(MouseEvent e) {
 
     }
 
-    public void setColor(Color c){
+    public void setColor(Color c) {
         color = c;
     }
 
-    public void setRectangle(int x, int y, int width, int height){
-        rectangle.setBounds(x,y,width,height);
+    public void setRectangle(int x, int y, int width, int height) {
+        rectangle.setBounds(x, y, width, height);
     }
 
-    public void setPrintPointFlag(boolean flag){
-        printPointFlag=flag;
+    public void setPrintPointFlag(boolean flag) {
+        printPointFlag = flag;
     }
 
 }

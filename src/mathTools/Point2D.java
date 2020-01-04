@@ -1,11 +1,11 @@
 package mathTools;
 
 public class Point2D {
-    private double x,y;
+    private double x, y;
 
-    public Point2D(double X, double Y){
-        x=X;
-        y=Y;
+    public Point2D(double X, double Y) {
+        x = X;
+        y = Y;
     }
 
     public void setPoint(double x, double y) {
